@@ -1,17 +1,84 @@
-# Скомпилированные файлы (бинарники)
-*.exe
+# ==========================================
+# Артефакты компиляции и объектные файлы
+# ==========================================
 *.o
 *.obj
+*.co
+*.ilk
+*.map
+*.exp
+*.gch
+*.pch
+*.idb
+*.pdb
 
-# Папки со сборкой
+# ==========================================
+# Статические и динамические библиотеки
+# ==========================================
+*.lib
+*.a
+*.la
+*.lo
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# ==========================================
+# Исполняемые файлы
+# ==========================================
+*.exe
+*.out
+*.app
+*.elf
+
+# ==========================================
+# Системы сборки (CMake, Make, Ninja)
+# ==========================================
 build/
-cmake-build-debug/
-bin/ # ну мало ли проект на Code::Blocks
+CMakeCache.txt
+CMakeFiles/
+CMakeSettings.json
+CMakeUserPresets.json
+Makefile
+cmake_install.cmake
+compile_commands.json
+.ninja_deps
+.ninja_log
 
-# Настройки вашей среды разработки (они у каждого свои)
+# ==========================================
+# Менеджеры зависимостей (vcpkg, Conan)
+# ==========================================
+vcpkg_installed/
+conan/
+.conan/
+
+# ==========================================
+# IDE и редакторы (VS Code, Visual Studio, CLion)
+# ==========================================
+# Visual Studio
+.vs/
+Debug/
+Release/
+x64/
+x86/
+*.suo
+*.user
+*.sln.docstates
+
+# VS Code
 .vscode/
-.idea/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 
-# Системный мусор
-Thumbs.db
-.DS_Store
+# CLion / JetBrains
+.idea/
+cmake-build-*/
+
+# Code::Blocks
+bin/
+
+# Локальные логи и временные файлы
+*.log
+*.tmp
