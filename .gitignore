@@ -6,7 +6,7 @@
 # Папки со сборкой
 build/
 cmake-build-debug/
-bin/ # ну мало ли Code::Blocks
+bin/ # ну мало ли проект на Code::Blocks
 
 # Настройки вашей среды разработки (они у каждого свои)
 .vscode/
