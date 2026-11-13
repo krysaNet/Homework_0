@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(Project main.cpp)
+add_executable(List main.cpp)
 
-target_sources(Project
+target_sources(List
         PRIVATE
             FILE_SET CXX_MODULES FILES
                 my_list.cppm
