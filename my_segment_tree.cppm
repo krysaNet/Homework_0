@@ -24,9 +24,9 @@ struct node {
     explicit node(T d, size_t i) : data(std::move(d)), idx(i), l(i), r(i) {}
 
     explicit node(shared_ptr<node> n) : node(n -> data, n -> idx) {
-            left = std::move(n);
-            l = left -> l;
-            r = left -> r;
+        left = std::move(n);
+        l = left -> l;
+        r = left -> r;
     }
 
     explicit node(shared_ptr<node> n1, shared_ptr<node> n2) :
