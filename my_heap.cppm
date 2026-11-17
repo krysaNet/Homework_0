@@ -66,7 +66,7 @@ class Heap {
             route += (temp % 2 == 0) ? '0' : '1';
             temp /= 2;
         }
-        reverse(route.begin(), route.end());
+        ranges::reverse(route);
 
         auto curr = root;
         for (size_t i = 0; i < route.length() - 1; ++i) {
