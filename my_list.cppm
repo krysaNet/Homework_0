@@ -12,7 +12,7 @@ template<typename T>
     std::unique_ptr<Node<T>> next;
     Node<T>* prev;
 
-    Node(auto val, std::unique_ptr<Node<T>> next = nullptr, Node<T>* prev = nullptr) :
+    explicit Node(auto val, std::unique_ptr<Node<T>> next = nullptr, Node<T>* prev = nullptr) :
         data(std::move(val)), next(std::move(next)), prev(prev) {}
 };
 
@@ -140,7 +140,7 @@ public:
                 if (!current->prev) {
                     throw std::out_of_range("Cannot decrement the beginning iterator");
                 }
-                else current = current -> prev;
+                current = current -> prev;
             }
             return *this;
         }
