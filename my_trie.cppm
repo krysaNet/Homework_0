@@ -1,6 +1,6 @@
 module;
 
-#include <iostream>
+#include <string>
 #include <memory>
 #include <unordered_map>
 
@@ -12,11 +12,11 @@ export class Trie {
         bool is_end_of_word;
         unordered_map<char, unique_ptr<node>> children;
 
-        explicit node(bool is_end = false) : is_end_of_word(is_end) {}
+        explicit node(bool is_end = false) noexcept : is_end_of_word(is_end) {}
     };
 
     unique_ptr<node> root = make_unique<node>();
-    size_t len = 0;
+    size_t len = 0uz;
 
     [[nodiscard]] const node* get_last_simbol(const string& s) const {
         const node* curr = root.get();
@@ -29,8 +29,11 @@ export class Trie {
     }
 
 public:
-    [[nodiscard]] size_t size() const {
+    [[nodiscard]] size_t size() const noexcept {
         return len;
+    }
+    [[nodiscard]] bool empty() const noexcept {
+        return len == 0uz;
     }
 
     void insert(const string& s) {
