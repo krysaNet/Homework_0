@@ -1,6 +1,7 @@
 module;
 
 #include <memory>
+#include <stdexcept>
 
 export module my_set;
 
@@ -15,7 +16,7 @@ struct node {
 
     explicit node(T x, node* p) : parent(p), data(std::move(x)) {}
 
-    auto get_pos() const {
+    auto get_pos() const noexcept {
         if (parent == nullptr) return Position::root;
         return (this == parent->left.get()) ? Position::left : Position::right;
     }
@@ -25,15 +26,45 @@ export template<typename T> class Set {
     std::unique_ptr<node<T>> root;
     std::size_t len = 0uz;
 
+    void del_node(node<T>* curr) noexcept {
+        auto child = curr->right ? std::move(curr->right) : std::move(curr->left);
+
+        if (child) {
+            child -> parent = curr -> parent;
+        }
+
+        auto p = curr -> get_pos();
+        if (p == Position::root) {
+            root = std::move(child);
+        }
+        else if (p == Position::left) {
+            curr -> parent -> left = std::move(child);
+        }
+        else {
+            curr -> parent -> right = std::move(child);
+        }
+    }
+
 public:
-    auto size() const {
+    auto size() const noexcept {
         return len;
     }
-    auto empty() const {
+    auto empty() const noexcept {
         return !root;
     }
-    void clear() {
-        root = nullptr;
+
+    void clear() noexcept {
+        while (root) {
+            if (root -> left) {
+                auto left_child = std::move(root -> left);
+                root -> left = std::move(left_child -> right);
+                left_child -> right = std::move(root);
+                root = std::move(left_child);
+            }
+            else {
+                root = std::move(root -> right);
+            }
+        }
         len = 0uz;
     }
 
@@ -67,10 +98,11 @@ public:
 
     class iterator {
         node<T>* curr;
+        const Set& host;
 
         friend class Set<T>;
 
-        node<T>* get_child_for_erase() {
+        node<T>* get_child_for_erase() noexcept {
             if (!curr) return nullptr;
             auto res = curr;
             if (res -> right) {
@@ -92,16 +124,16 @@ public:
             return nullptr;
         }
 
-        void fall_left() {
+        void fall_left() noexcept {
             if (curr) {
                 while (curr -> left) curr = curr->left.get();
             }
         }
 
     public:
-        explicit iterator(node<T>* curr) : curr(curr) {}
+        explicit iterator(node<T>* curr, const Set& s) noexcept : curr(curr), host(s) {}
 
-        explicit iterator(const T& x, node<T>* root) : curr(root) {
+        explicit iterator(const T& x, const Set& s, node<T>* root) : curr(root), host(s) {
             while (curr != nullptr) {
                 if (curr -> data == x) break;
                 if (x < curr -> data) {
@@ -113,14 +145,25 @@ public:
             }
         }
 
+        const auto& get_set() const noexcept {
+            return host;
+        }
+
         const auto& operator * () const {
+            if (!curr) {
+                throw std::out_of_range("Cannot get value at the end iterator");
+            }
             return curr -> data;
         }
 
-        bool operator == (const iterator& x) const = default;
+        bool operator == (const iterator& x) const noexcept {
+            return curr == x.curr;
+        }
 
         auto& operator ++ () {
-            if (!curr) return *this;
+            if (!curr) {
+                throw std::out_of_range("Cannot increment the end iterator");
+            }
 
             if (curr -> right) {
                 curr = curr->right.get();
@@ -137,41 +180,23 @@ public:
         }
     };
 
-    auto begin() const {
-        iterator it{root.get()};
+    auto begin() const noexcept {
+        iterator it{root.get(), *this};
         it.fall_left();
         return it;
     }
 
-    auto end() const {
-        return iterator{nullptr};
+    auto end() const noexcept {
+        return iterator{nullptr, *this};
     }
 
-    bool contains(const T& x) const {
-        iterator it{x, root.get()};
-        return it.curr != nullptr;
-    }
-
-    void del_node(node<T>* curr) {
-        auto child = curr->right ? std::move(curr->right) : std::move(curr->left);
-
-        if (child) {
-            child -> parent = curr -> parent;
-        }
-
-        auto p = curr -> get_pos();
-        if (p == Position::root) {
-            root = std::move(child);
-        }
-        else if (p == Position::left) {
-            curr -> parent -> left = std::move(child);
-        }
-        else {
-            curr -> parent -> right = std::move(child);
-        }
-    }
     void erase(iterator it) {
-        if (it == end()) return;
+        if (&it.get_set() != this) {
+            throw std::invalid_argument("Iterator belongs to another tree");
+        }
+        if (it == end()) {
+            throw std::invalid_argument("Cannot erase end iterator");
+        }
 
         node<T>* target = it.curr;
         if (auto ch = it.get_child_for_erase()) {
@@ -181,5 +206,26 @@ public:
 
         del_node(target);
         --len;
+    }
+
+    auto find(const T& x)const {
+        return iterator{x, *this, root.get()};
+    }
+
+    void erase(const T& x) {
+        auto it = find(x);
+        if (it == end()) {
+            throw std::out_of_range("Element not found");
+        }
+        erase(it);
+    }
+
+    bool contains(const T& x) const {
+        return find(x) != end();
+    }
+
+
+    ~Set() {
+        clear();
     }
 };
