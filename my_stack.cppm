@@ -28,6 +28,13 @@ public:
         return data.back();
     }
 
+    const auto& top() const {
+        if (data.empty()) {
+            throw std::out_of_range("Stack is empty: cannot call top()");
+        }
+        return data.back();
+    }
+
     auto size() const noexcept {
         return data.size();
     }
