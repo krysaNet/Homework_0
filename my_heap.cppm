@@ -4,6 +4,7 @@ module;
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <stdexcept>
 
 export module my_heap;
 using namespace std;
@@ -17,15 +18,15 @@ class Heap {
         else return child < parent;
     }
 
-    struct node : enable_shared_from_this<node> { // make_shared<...>(this) is safe now
+    struct node : enable_shared_from_this<node> {
         T data;
         shared_ptr<node> left = nullptr;
         shared_ptr<node> right = nullptr;
         weak_ptr<node> parent;
 
         node() = default;
-        explicit node(T x) : data(x) {}
-        explicit node(T x, const shared_ptr<node>& p) : data(x), parent(p) {}
+        explicit node(T x) : data(std::move(x)) {}
+        explicit node(T x, shared_ptr<node> p) : data(std::move(x)), parent(std::move(p)) {}
 
         void sift_up() {
             auto p = parent.lock();
@@ -79,17 +80,16 @@ class Heap {
     }
 
 public:
-    [[nodiscard]] size_t size() const {
+    [[nodiscard]] size_t size() const noexcept {
         return len;
     }
-    [[nodiscard]] bool empty() const {
+    [[nodiscard]] bool empty() const noexcept {
         return len == 0;
     }
 
     T top() const {
         if (empty()) {
-            cout << "Heap is empty" << endl;
-            exit(1);
+            throw std::out_of_range("Heap is empty: cannot call top()");
         }
         return root -> data;
     }
@@ -111,7 +111,10 @@ public:
     }
 
     T pop() {
-        T x = top();
+        if (empty()) {
+            throw std::out_of_range("Heap is empty: cannot call pop()");
+        }
+        auto x = root -> data;
         if (len == 1) {
             root = nullptr;
             len = 0;
